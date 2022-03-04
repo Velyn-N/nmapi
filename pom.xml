@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>de.nmadev</groupId>
+  <artifactId>nmapi</artifactId>
+  <version>0.1</version>
+  <packaging>war</packaging>
+  <name>NMApi</name>
+  <description>NMAs multi-purpose App-Api</description>
+
+  <properties>
+    <!-- Global Maven settings -->
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- The default value changed to `false` since maven-war-plugin 3.0.0 -->
+    <!--<failOnMissingWebXml>false</failOnMissingWebXml> -->
+
+    <!-- Official Maven Plugins -->
+    <maven-compiler-plugin.version>3.8.1</maven-compiler-plugin.version>
+    <maven-war-plugin.version>3.3.2</maven-war-plugin.version>
+    <maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.0.0-M5</maven-failsafe-plugin.version>
+    <maven-surefire-report-plugin.version>3.0.0-M5</maven-surefire-report-plugin.version>
+
+    <!-- Cargo maven plugin -->
+    <cargo-maven3-plugin.version>1.9.8</cargo-maven3-plugin.version>
+
+    <!-- Jakarta EE API -->
+    <jakartaee-api.version>9.1.0</jakartaee-api.version>
+
+    <!-- Arquillian BOM -->
+    <arquillian-bom.version>1.6.0.Final</arquillian-bom.version>
+
+    <!-- Wildfly server -->
+    <wildfly.version>25.0.1.Final</wildfly.version>
+    <wildfly-maven-plugin.version>2.1.0.Final</wildfly-maven-plugin.version>
+    <!-- Only WildFly embedded adapter 4.0.0.Alpha1 works with WildFly 24+ -->
+    <wildfly-arquillian.version>4.0.0.Alpha1</wildfly-arquillian.version>
+    <!-- websockets-jsr and resteasy for client, aligned with Wildfly version. -->
+    <undertow-websockets-jsr.version>2.1.3.Final</undertow-websockets-jsr.version>
+    <resteasy.version>4.6.0.Final</resteasy.version>
+
+    <!-- By default, skip tests -->
+    <skipTests>true</skipTests>
+  </properties>
+  
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>jakarta.platform</groupId>
+        <artifactId>jakarta.jakartaee-api</artifactId>
+        <version>${jakartaee-api.version}</version>
+        <scope>provided</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.jboss.arquillian</groupId>
+        <artifactId>arquillian-bom</artifactId>
+        <version>${arquillian-bom.version}</version>
+        <scope>import</scope>
+        <type>pom</type>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <repositories>
+    <repository>
+      <id>dv8tion</id>
+      <name>m2-dv8tion</name>
+      <url>https://m2.dv8tion.net/releases</url>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- APIs & SDKs -->
+
+    <dependency>
+      <groupId>net.dv8tion</groupId>
+      <artifactId>JDA</artifactId>
+      <version>5.0.0-alpha.3</version>
+      <exclusions>
+        <exclusion>
+          <groupId>club.minnced</groupId>
+          <artifactId>opus-java</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <!-- Security -->
+
+    <dependency>
+      <groupId>at.favre.lib</groupId>
+      <artifactId>bcrypt</artifactId>
+      <version>0.9.0</version>
+    </dependency>
+
+    <!-- Serialization & Http -->
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.8.9</version>
+    </dependency>
+    <dependency>
+      <groupId>com.squareup.okhttp3</groupId>
+      <artifactId>okhttp</artifactId>
+      <version>4.9.3</version>
+    </dependency>
+
+    <!-- Code Quality -->
+
+    <dependency>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+      <version>1.18.22</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version><!--$NO-MVN-MAN-VER$ -->
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>30.1.1-jre</version>
+    </dependency>
+
+    <!-- JSF & JEE Essentials -->
+
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+      <version>8.0.27</version>
+    </dependency>
+    <dependency>
+      <groupId>org.omnifaces</groupId>
+      <artifactId>omnifaces</artifactId>
+      <version>4.0-M12</version>
+    </dependency>
+    <dependency>
+      <groupId>jakarta.platform</groupId>
+      <artifactId>jakarta.jakartaee-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.jboss.arquillian.junit</groupId>
+      <artifactId>arquillian-junit-container</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <finalName>${project.artifactId}.war</finalName>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven-compiler-plugin.version}</version>
+        <configuration>
+          <source>17</source>
+          <target>17</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-war-plugin</artifactId>
+        <version>${maven-war-plugin.version}</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <skipTests>${skipTests}</skipTests>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>test</phase>
+            <id>default-test</id>
+            <configuration>
+              <excludes>
+                <exclude>**/it/**</exclude>
+              </excludes>
+              <reportsDirectory>
+                ${project.build.directory}/test-reports/unit
+              </reportsDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>${maven-failsafe-plugin.version}</version>
+        <configuration>
+          <skipITs>${skipTests}</skipITs>
+        </configuration>
+        <executions>
+          <execution>
+            <phase>integration-test</phase>
+            <id>integration-test</id>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+            <configuration>
+              <trimStackTrace>false</trimStackTrace>
+              <includes>
+                <include>**/it/**</include>
+              </includes>
+              <reportsDirectory>
+                ${project.build.directory}/test-reports/it
+              </reportsDirectory>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+    </plugins>
+  </build>
+
+  <profiles>
+    <profile>
+      <id>wildfly</id>
+      <build>
+        <plugins>
+          <!-- The WildFly plugin deploys your war to a local WildFly container -->
+          <!-- To use, run: mvn package wildfly:deploy -->
+          <plugin>
+            <groupId>org.wildfly.plugins</groupId>
+            <artifactId>wildfly-maven-plugin</artifactId>
+            <version>${wildfly-maven-plugin.version}</version>
+            <configuration>
+              <!-- if a wildfly.home property is not present, firstly it 
+                will download a copy of wildfly distribution automatically -->
+              <!-- also fetch from jbossHome -->
+              <!-- <jossHome>${env.WILDFLY_HOME}</jbossHome> -->
+
+              <!-- control remote wildfly server -->
+              <!-- <hostname></hostname> <port></port> <username></username> 
+                <password></password> -->
+
+              <!-- or set a wildfly.id property to add a server in settings.xml -->
+              <!--<id>wildfly-svr</id> -->
+
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>
